@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">BMI Calculator</string>
+    <string name="action_history">History</string>
+    <string name="previous">Go Back</string>
+    <string name="weight_kg">Weight (kg)</string>
+    <string name="enter_weight">Enter weight</string>
+    <string name="height_centimeters">Height (centimeters)</string>
+    <string name="enter_height">Enter height</string>
+    <string name="calculate_bmi">Calculate BMI</string>
+    <string name="bmi_result">BMI Result: %s</string>
+    <string name="weight_lbs">Weight (lbs)</string>
+    <string name="height_inches">Height (inches)</string>
+    <string name="history">History</string>
+    <string name="clear_history">Clear History</string>
+    <string name="enter_both">Please enter both weight and height.</string>
+    <string name="must_be_positive">Weight and height must be positive.</string>
+    <string name="imperial_metrics">Imperial Metrics</string>
+    <string name="european_metrics">European Metrics</string>
+</resources>
