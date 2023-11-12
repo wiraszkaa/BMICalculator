@@ -24,6 +24,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var weightInput: EditText
     private lateinit var heightInput: EditText
     private lateinit var bmiResult: TextView
+    private lateinit var bmiDescription: TextView
     private var isImperial = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,6 +42,7 @@ class MainActivity : AppCompatActivity() {
         weightInput = binding.weightInput
         heightInput = binding.heightInput
         bmiResult = binding.bmiResult
+        bmiDescription = binding.bmiDescription
 
         val calculateButton: Button = binding.calculateButton
 
@@ -56,44 +58,52 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.action_metrics -> when (isImperial) {
-                true -> {
-                    isImperial = false
-                    item.title = getString(R.string.imperial_metrics)
-                    weightLabel.text = getString(R.string.weight_kg)
-                    heightLabel.text = getString(R.string.height_centimeters)
+            R.id.action_metrics -> {
+                when (isImperial) {
+                    true -> {
+                        isImperial = false
+                        item.title = getString(R.string.imperial_metrics)
+                        weightLabel.text = getString(R.string.weight_kg)
+                        heightLabel.text = getString(R.string.height_centimeters)
+                    }
+                    false -> {
+                        isImperial = true
+                        item.title = getString(R.string.european_metrics)
+                        weightLabel.text = getString(R.string.weight_lbs)
+                        heightLabel.text = getString(R.string.height_inches)
+                    }
                 }
-                false -> {
-                    isImperial = true
-                    item.title = getString(R.string.european_metrics)
-                    weightLabel.text = getString(R.string.weight_lbs)
-                    heightLabel.text = getString(R.string.height_inches)
-                }
+                weightInput.setText("")
+                heightInput.setText("")
+                clearData()
             }
-            R.id.action_history -> {
-                startActivity(Intent(this, HistoryActivity::class.java))
-            }
+            R.id.action_history -> startActivity(Intent(this, HistoryActivity::class.java))
+            R.id.action_me -> startActivity(Intent(this, AboutMeActivity::class.java))
         }
         return super.onOptionsItemSelected(item)
     }
 
+    private fun clearData() {
+        bmiResult.text = ""
+        bmiResult.setTextColor(Color.BLACK)
+        bmiResult.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+        bmiDescription.text = ""
+    }
+
     private fun calculateBMI() {
+        clearData()
+
         val weightText = weightInput.text.toString()
         val heightText = heightInput.text.toString()
 
         if (weightText.isEmpty() || heightText.isEmpty()) {
-            // q: set back the default color for bmiResult
-            val color = bmiResult.textColors
-            bmiResult.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
             bmiResult.text = getString(R.string.enter_both)
             return
         }
 
         val weight = weightText.toDouble()
         val height = heightText.toDouble()
-
         if (weight <= 0 || height <= 0) {
-            bmiResult.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
             bmiResult.text = getString(R.string.must_be_positive)
             return
         }
@@ -106,16 +116,35 @@ class MainActivity : AppCompatActivity() {
 
         // Save the result
         val bmiEntry =
-            BMIEntry(weight, height, bmi, isImperial, LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")).toString())
+            BMIEntry(
+                weight,
+                height,
+                bmi,
+                isImperial,
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"))
+                    .toString()
+            )
         history.addEntry(bmiEntry)
         history.saveHistory(this)
 
         // Display the result
         when (bmi) {
-            in 0.0..18.5 -> bmiResult.setTextColor(Color.YELLOW)
-            in 18.5..24.9 -> bmiResult.setTextColor(Color.GREEN)
-            in 25.0..29.9 -> bmiResult.setTextColor(Color.YELLOW)
-            else -> bmiResult.setTextColor(Color.RED)
+            in 0.0..18.5 -> {
+                bmiResult.setTextColor(Color.RED)
+                bmiDescription.setText(R.string.underweight_desc)
+            }
+            in 18.5..24.9 -> {
+                bmiResult.setTextColor(Color.GREEN)
+                bmiDescription.setText(R.string.normal_desc)
+            }
+            in 25.0..29.9 -> {
+                bmiResult.setTextColor(Color.RED)
+                bmiDescription.setText(R.string.overweight_desc)
+            }
+            else -> {
+                bmiResult.setTextColor(Color.RED)
+                bmiDescription.setText(R.string.obese_desc)
+            }
         }
         bmiResult.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
         bmiResult.text = getString(R.string.bmi_result, bmi.toString())
